@@ -175,6 +175,73 @@ string decrypt(vector<bool> cipher,vector<bool> key)
 	return ans;
 }
 
+string encryptstream(vector<bool> plain, vector<bool> key)
+{
+	int n=plain.size();
+	string ciphertext="";
+	int ptr=0;
+	do
+	{
+		vector<bool> t(plain.begin()+ptr,plain.begin()+ptr+64);
+		ciphertext+=encrypt(t,key);
+		ptr+=64;
+	}while(ptr<n);
+	return ciphertext;
+}
+
+string decryptstream(vector<bool> cipher, vector<bool> key)
+{
+	int n=cipher.size();
+	string decryptedtext="";
+	int ptr=0;
+	do
+	{
+		vector<bool> t(cipher.begin()+ptr,cipher.begin()+ptr+64);
+		decryptedtext+=decrypt(t,key);
+		ptr+=64;
+	}while(ptr<n);
+	return decryptedtext;
+}
+
+string tripleDESencrypt(vector<bool> plain, vector<bool> key)
+{
+	vector<bool> key1(key.begin(),key.begin()+64), key2(key.begin()+64,key.end());
+	
+	string tempstr1=encryptstream(plain,key1);
+
+	vector<bool> tempvec1;
+	for(int i=0;i<tempstr1.size();i++)
+		tempvec1.push_back(tempstr1[i]=='1');
+	
+	string tempstr2=decryptstream(tempvec1,key2);
+	
+	vector<bool> tempvec2;
+	for(int i=0;i<tempstr2.size();i++)
+		tempvec2.push_back(tempstr2[i]=='1');
+
+	string cipher=encryptstream(tempvec2,key1);
+	return cipher;
+}
+
+string tripleDESdecrypt(vector<bool> cipher, vector<bool> key)
+{
+	vector<bool> key1(key.begin(),key.begin()+64), key2(key.begin()+64,key.end());
+	string tempstr1=decryptstream(cipher,key1);
+
+	vector<bool> tempvec1;
+	for(int i=0;i<tempstr1.size();i++)
+		tempvec1.push_back(tempstr1[i]=='1');
+	
+	string tempstr2=encryptstream(tempvec1,key2);
+	
+	vector<bool> tempvec2;
+	for(int i=0;i<tempstr2.size();i++)
+		tempvec2.push_back(tempstr2[i]=='1');
+
+	string plain=decryptstream(tempvec2,key1);
+	return plain;
+}
+
 int main()
 {
 	string plaintext;
@@ -203,7 +270,8 @@ int main()
 		n++;
 	}
 
-	vector<bool> key={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+	vector<bool> key={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+					  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 	//vector<bool> key={0,1,1,1,0,1,0,1,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,0,0,1,0,1,1,1,0,1,0,0,1,0,0,1,0,0,1,1,1,1,0,0,1,0,1,1,0,1,1,1,0,0,0,0};
 	
 	/*string keystring;
@@ -227,28 +295,15 @@ int main()
 			}
 	}*/
 
-	string ciphertext="";
-	int ptr=0;
-	do
-	{
-		vector<bool> t(plain.begin()+ptr,plain.begin()+ptr+64);
-		ciphertext+=encrypt(t,key);
-		ptr+=64;
-	}while(ptr<n);
+	string ciphertext=tripleDESencrypt(plain, key);
 
 	cout<<"The encrypted text is: "<<ciphertext<<"\n";
 
-	vector<bool> cipher(n);
-	for(int i=0;i<n;i++)
-		cipher[i]=(ciphertext[i]=='1');
-	string decryptedtext="";
-	ptr=0;
-	do
-	{
-		vector<bool> t(cipher.begin()+ptr,cipher.begin()+ptr+64);
-		decryptedtext+=decrypt(t,key);
-		ptr+=64;
-	}while(ptr<n);
+	vector<bool> cipher;
+	for(int i=0;i<ciphertext.size();i++)
+		cipher.push_back(ciphertext[i]=='1');
+
+	string decryptedtext=tripleDESdecrypt(cipher, key);
 
 	cout<<"The decrypted text is: "<<decryptedtext<<"\n";
 }
