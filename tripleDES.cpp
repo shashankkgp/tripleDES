@@ -70,6 +70,13 @@ vector<vector<bool> > keyscheduler(vector<bool> key)
 
 }
 
+vector<vector<bool> > reversekeyscheduler(vector<bool> key)
+{
+	vector<vector<bool> > keys=keyscheduler(key);
+	reverse(keys.begin(),keys.end());
+	return keys;
+}
+
 vector<bool> e(vector<bool> v)
 {
 	vector<int> E=readFile("Enlarge.txt");
@@ -106,12 +113,12 @@ vector<bool> s(vector<bool> v)
 
 vector<bool> f(vector<bool> v, vector<bool> key)
 {
-	cout<<"**********F begins\n\n";
-	print(v);
-	vector<bool> enlarged=e(v);			print(enlarged);
-	vector<bool> xored=xor_bitwise(enlarged,key);		print(xored);
-	vector<bool> substituted=s(xored);		print(substituted);
-	vector<bool> permuted=p(substituted);		print(permuted);
+	//cout<<"**********F begins\n\n";
+	//print(v);
+	vector<bool> enlarged=e(v);			//print(enlarged);
+	vector<bool> xored=xor_bitwise(enlarged,key);		//print(xored);
+	vector<bool> substituted=s(xored);		//print(substituted);
+	vector<bool> permuted=p(substituted);		//print(permuted);
 	return permuted;
 }
 
@@ -142,6 +149,99 @@ string encrypt(vector<bool> plain,vector<bool> key)
 	return ans;
 }
 
+string decrypt(vector<bool> cipher,vector<bool> key)
+{
+	vector<vector<bool> > roundkeys=reversekeyscheduler(key);
+	vector<int> ip=readFile("IP.txt");
+	vector<int> invip=readFile("invIP.txt");
+
+	vector<bool> m=permute(cipher,ip);
+	int n=m.size();
+	cout<<endl;
+	for(int i=0;i<16;i++)
+	{
+		vector<bool> temp(m.begin()+32,m.end());
+		vector<bool> q(m.begin(),m.begin()+32);
+		vector<bool> temp2=xor_bitwise(f(temp,roundkeys[i]),q);
+		temp.insert(temp.end(),temp2.begin(),temp2.end());
+		m=temp;
+	}
+	vector<bool> finl(m.begin()+32,m.end());
+	finl.insert(finl.end(),m.begin(),m.begin()+32);
+	vector<bool> decrypted=permute(finl,invip);
+	string ans="";
+	for(int i=0;i<n;i++)
+		ans+='0'+decrypted[i];
+	return ans;
+}
+
+string encryptstream(vector<bool> plain, vector<bool> key)
+{
+	int n=plain.size();
+	string ciphertext="";
+	int ptr=0;
+	do
+	{
+		vector<bool> t(plain.begin()+ptr,plain.begin()+ptr+64);
+		ciphertext+=encrypt(t,key);
+		ptr+=64;
+	}while(ptr<n);
+	return ciphertext;
+}
+
+string decryptstream(vector<bool> cipher, vector<bool> key)
+{
+	int n=cipher.size();
+	string decryptedtext="";
+	int ptr=0;
+	do
+	{
+		vector<bool> t(cipher.begin()+ptr,cipher.begin()+ptr+64);
+		decryptedtext+=decrypt(t,key);
+		ptr+=64;
+	}while(ptr<n);
+	return decryptedtext;
+}
+
+string tripleDESencrypt(vector<bool> plain, vector<bool> key)
+{
+	vector<bool> key1(key.begin(),key.begin()+64), key2(key.begin()+64,key.end());
+	
+	string tempstr1=encryptstream(plain,key1);
+
+	vector<bool> tempvec1;
+	for(int i=0;i<tempstr1.size();i++)
+		tempvec1.push_back(tempstr1[i]=='1');
+	
+	string tempstr2=decryptstream(tempvec1,key2);
+	
+	vector<bool> tempvec2;
+	for(int i=0;i<tempstr2.size();i++)
+		tempvec2.push_back(tempstr2[i]=='1');
+
+	string cipher=encryptstream(tempvec2,key1);
+	return cipher;
+}
+
+string tripleDESdecrypt(vector<bool> cipher, vector<bool> key)
+{
+	vector<bool> key1(key.begin(),key.begin()+64), key2(key.begin()+64,key.end());
+	string tempstr1=decryptstream(cipher,key1);
+
+	vector<bool> tempvec1;
+	for(int i=0;i<tempstr1.size();i++)
+		tempvec1.push_back(tempstr1[i]=='1');
+	
+	string tempstr2=encryptstream(tempvec1,key2);
+	
+	vector<bool> tempvec2;
+	for(int i=0;i<tempstr2.size();i++)
+		tempvec2.push_back(tempstr2[i]=='1');
+
+	string plain=decryptstream(tempvec2,key1);
+	return plain;
+}
+
 int main()
 {
 	string plaintext;
@@ -170,16 +270,40 @@ int main()
 		n++;
 	}
 
-	vector<bool> key={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+	vector<bool> key={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+					  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 	//vector<bool> key={0,1,1,1,0,1,0,1,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,0,0,1,0,1,1,1,0,1,0,0,1,0,0,1,0,0,1,1,1,1,0,0,1,0,1,1,0,1,1,1,0,0,0,0};
-	string ciphertext="";
-	int ptr=0;
-	do
+	
+	/*string keystring;
+	cout<<"Enter 128-key for cipher: ";
+	cin>>keystring;
+	int n=keystring.size();
+	assert(n==128);
+	vector<bool> key(n);
+	for(int i=0;i<n;i++)
 	{
-		vector<bool> t(plain.begin()+ptr,plain.begin()+ptr+64);
-		ciphertext+=encrypt(t,key);
-		ptr+=64;
-	}while(ptr<n);
+		if(keystring[i]=='0')
+			key[i]=0;
+		else
+			if(keystring[i]=='1')
+				key[i]=1;
+			else
+			{
+				cout<<"Please enter a valid boolean string as key...\n";
+				cout<<"The program will now exit!\n";
+				exit(1);
+			}
+	}*/
+
+	string ciphertext=tripleDESencrypt(plain, key);
 
 	cout<<"The encrypted text is: "<<ciphertext<<"\n";
+
+	vector<bool> cipher;
+	for(int i=0;i<ciphertext.size();i++)
+		cipher.push_back(ciphertext[i]=='1');
+
+	string decryptedtext=tripleDESdecrypt(cipher, key);
+
+	cout<<"The decrypted text is: "<<decryptedtext<<"\n";
 }
