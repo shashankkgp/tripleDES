@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cstdio>
 #include <string>
+#include <cstdlib>
+#include <cassert>
 using namespace std;
 
 void print(vector<bool> v)
@@ -270,14 +272,14 @@ int main()
 		n++;
 	}
 
-	vector<bool> key={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-					  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+	//vector<bool> key={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+	//				  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 	//vector<bool> key={0,1,1,1,0,1,0,1,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,0,0,1,0,1,1,1,0,1,0,0,1,0,0,1,0,0,1,1,1,1,0,0,1,0,1,1,0,1,1,1,0,0,0,0};
 	
-	/*string keystring;
+	string keystring;
 	cout<<"Enter 128-key for cipher: ";
 	cin>>keystring;
-	int n=keystring.size();
+	n=keystring.size();
 	assert(n==128);
 	vector<bool> key(n);
 	for(int i=0;i<n;i++)
@@ -293,7 +295,7 @@ int main()
 				cout<<"The program will now exit!\n";
 				exit(1);
 			}
-	}*/
+	}
 
 	string ciphertext=tripleDESencrypt(plain, key);
 
